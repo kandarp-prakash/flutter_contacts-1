@@ -110,7 +110,7 @@ public class SwiftContactsServicePlugin: NSObject, FlutterPlugin, CNContactViewC
     
     let controller = UINavigationController(rootViewController: self.addContactSession!.contactViewController);
     
-    self.flutterVC.present(controller, animated: true, completion: nil)
+    self.rootViewController.present(controller, animated: true, completion: nil)
   }
 func dictionaryToContact(dictionary : [String:Any]) -> CNMutableContact{
     let contact = CNMutableContact()
