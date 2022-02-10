@@ -12,7 +12,7 @@ public class SwiftContactsServicePlugin: NSObject, FlutterPlugin, CNContactViewC
     static let FORM_COULD_NOT_BE_OPEN: Int = 2
     private var addContactSession: ContactViewDelegate?;
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "github.com/clovisnicolas/flutter_contacts", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(name: "github.com/kandarp-prakash/flutter_contacts-1", binaryMessenger: registrar.messenger())
         let rootViewController = UIApplication.shared.delegate!.window!!.rootViewController!;
         let instance = SwiftContactsServicePlugin(rootViewController)
         registrar.addMethodCallDelegate(instance, channel: channel)
@@ -58,7 +58,7 @@ public class SwiftContactsServicePlugin: NSObject, FlutterPlugin, CNContactViewC
         case "addContact":
             let contact = dictionaryToContact(dictionary: call.arguments as! [String : Any]);
             launchContactVC(withResult: result, forNewContact: contact);
-            break;
+          
 //             let contact = dictionaryToContact(dictionary: call.arguments as! [String : Any])
 
 //             let addResult = addContact(contact: contact)
