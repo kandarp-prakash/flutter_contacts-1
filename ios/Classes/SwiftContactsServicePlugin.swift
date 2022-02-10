@@ -56,15 +56,18 @@ public class SwiftContactsServicePlugin: NSObject, FlutterPlugin, CNContactViewC
                 )
             )
         case "addContact":
-            let contact = dictionaryToContact(dictionary: call.arguments as! [String : Any])
+            let contact = dictionaryToContact(dictionary: call.arguments as! [String : Any]);
+            launchContactVC(withResult: result, forNewContact: contact);
+            break;
+//             let contact = dictionaryToContact(dictionary: call.arguments as! [String : Any])
 
-            let addResult = addContact(contact: contact)
-            if (addResult == "") {
-                result(nil)
-            }
-            else {
-                result(FlutterError(code: "", message: addResult, details: nil))
-            }
+//             let addResult = addContact(contact: contact)
+//             if (addResult == "") {
+//                 result(nil)
+//             }
+//             else {
+//                 result(FlutterError(code: "", message: addResult, details: nil))
+//             }
         case "deleteContact":
             if(deleteContact(dictionary: call.arguments as! [String : Any])){
                 result(nil)
@@ -97,7 +100,68 @@ public class SwiftContactsServicePlugin: NSObject, FlutterPlugin, CNContactViewC
             result(FlutterMethodNotImplemented)
         }
     }
-
+     
+  func launchContactVC(withResult result: FlutterResult, forNewContact contact: CNContact)
+  {
+    self.addContactSession = ContactViewDelegate(withResult: result, withNewContact: contact);
+    self.addContactSession!.didFinish = { [weak self] in
+      self?.addContactSession = nil;
+    }
+    
+    let controller = UINavigationController(rootViewController: self.addContactSession!.contactViewController);
+    
+    self.flutterVC.present(controller, animated: true, completion: nil)
+  }
+func dictionaryToContact(dictionary : [String:Any]) -> CNMutableContact{
+    let contact = CNMutableContact()
+  
+    //Simple fields
+    contact.givenName = dictionary["givenName"] as? String ?? ""
+    contact.familyName = dictionary["familyName"] as? String ?? ""
+    contact.middleName = dictionary["middleName"] as? String ?? ""
+    contact.namePrefix = dictionary["prefix"] as? String ?? ""
+    contact.nameSuffix = dictionary["suffix"] as? String ?? ""
+    contact.organizationName = dictionary["company"] as? String ?? ""
+    contact.jobTitle = dictionary["jobTitle"] as? String ?? ""
+    if let avatarData = (dictionary["avatar"] as? FlutterStandardTypedData)?.data {
+        contact.imageData = avatarData
+    }
+  
+    //Phone numbers
+    if let phoneNumbers = dictionary["phones"] as? [[String:String]]{
+      for phone in phoneNumbers where phone["value"] != nil {
+        contact.phoneNumbers.append(
+          CNLabeledValue(
+            label: getPhoneLabel(
+              label: phone["label"]),
+              value: CNPhoneNumber(stringValue: phone["value"]!)))
+      }
+    }
+  
+    //Emails
+    if let emails = dictionary["emails"] as? [[String:String]]{
+      for email in emails where nil != email["value"] {
+        let emailLabel = email["label"] ?? ""
+        contact.emailAddresses.append(CNLabeledValue(label:emailLabel, value:email["value"]! as NSString))
+      }
+    }
+  
+    //Postal addresses
+    if let postalAddresses = dictionary["postalAddresses"] as? [[String:String]]{
+      for postalAddress in postalAddresses {
+        let newAddress = CNMutablePostalAddress()
+        newAddress.street = postalAddress["street"] ?? ""
+        newAddress.city = postalAddress["city"] ?? ""
+        newAddress.postalCode = postalAddress["postcode"] ?? ""
+        newAddress.country = postalAddress["country"] ?? ""
+        newAddress.state = postalAddress["region"] ?? ""
+        let label = postalAddress["label"] ?? ""
+        contact.postalAddresses.append(CNLabeledValue(label:label, value:newAddress))
+      }
+    }
+  
+    return contact
+  }
     func getContacts(query : String?, withThumbnails: Bool, photoHighResolution: Bool, phoneQuery: Bool, emailQuery: Bool = false, orderByGivenName: Bool, localizedLabels: Bool) -> [[String:Any]]{
 
         var contacts : [CNContact] = []
