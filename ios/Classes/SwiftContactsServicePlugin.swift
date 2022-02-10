@@ -10,7 +10,7 @@ public class SwiftContactsServicePlugin: NSObject, FlutterPlugin, CNContactViewC
     private let rootViewController: UIViewController
     static let FORM_OPERATION_CANCELED: Int = 1
     static let FORM_COULD_NOT_BE_OPEN: Int = 2
-    
+    private var addContactSession: ContactViewDelegate?;
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "github.com/clovisnicolas/flutter_contacts", binaryMessenger: registrar.messenger())
         let rootViewController = UIApplication.shared.delegate!.window!!.rootViewController!;
