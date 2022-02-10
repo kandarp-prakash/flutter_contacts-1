@@ -495,62 +495,6 @@ func dictionaryToContact(dictionary : [String:Any]) -> CNMutableContact{
         }
         return true;
     }
-
-    func dictionaryToContact(dictionary : [String:Any]) -> CNMutableContact{
-        let contact = CNMutableContact()
-
-        //Simple fields
-        contact.givenName = dictionary["givenName"] as? String ?? ""
-        contact.familyName = dictionary["familyName"] as? String ?? ""
-        contact.middleName = dictionary["middleName"] as? String ?? ""
-        contact.namePrefix = dictionary["prefix"] as? String ?? ""
-        contact.nameSuffix = dictionary["suffix"] as? String ?? ""
-        contact.organizationName = dictionary["company"] as? String ?? ""
-        contact.jobTitle = dictionary["jobTitle"] as? String ?? ""
-        if let avatarData = (dictionary["avatar"] as? FlutterStandardTypedData)?.data {
-            contact.imageData = avatarData
-        }
-
-        //Phone numbers
-        if let phoneNumbers = dictionary["phones"] as? [[String:String]]{
-            for phone in phoneNumbers where phone["value"] != nil {
-                contact.phoneNumbers.append(CNLabeledValue(label:getPhoneLabel(label:phone["label"]),value:CNPhoneNumber(stringValue:phone["value"]!)))
-            }
-        }
-
-        //Emails
-        if let emails = dictionary["emails"] as? [[String:String]]{
-            for email in emails where nil != email["value"] {
-                let emailLabel = email["label"] ?? ""
-                contact.emailAddresses.append(CNLabeledValue(label:getCommonLabel(label: emailLabel), value:email["value"]! as NSString))
-            }
-        }
-
-        //Postal addresses
-        if let postalAddresses = dictionary["postalAddresses"] as? [[String:String]]{
-            for postalAddress in postalAddresses{
-                let newAddress = CNMutablePostalAddress()
-                newAddress.street = postalAddress["street"] ?? ""
-                newAddress.city = postalAddress["city"] ?? ""
-                newAddress.postalCode = postalAddress["postcode"] ?? ""
-                newAddress.country = postalAddress["country"] ?? ""
-                newAddress.state = postalAddress["region"] ?? ""
-                let label = postalAddress["label"] ?? ""
-                contact.postalAddresses.append(CNLabeledValue(label: getCommonLabel(label: label), value: newAddress))
-            }
-        }
-
-        //BIRTHDAY
-        if let birthday = dictionary["birthday"] as? String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            let date = formatter.date(from: birthday)!
-            contact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        }
-
-        return contact
-    }
-
     func contactToDictionary(contact: CNContact, localizedLabels: Bool) -> [String:Any]{
 
         var result = [String:Any]()
